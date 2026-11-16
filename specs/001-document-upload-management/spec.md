@@ -11,6 +11,25 @@
 organize by category and project, browse, search, preview, download, edit, delete, share, integrate
 with tasks, dashboard, and notifications, and keep an activity audit trail.)
 
+## Clarifications
+
+### Session 2026-11-16
+
+- Q: When several files are uploaded at once, how is metadata entered? → A: One shared set of
+  metadata (category, project, description, tags) applies to the whole batch; each file's title
+  defaults to its file name without extension and can be edited before upload.
+- Q: What may a Team Lead do with documents uploaded by members of their team? → A: View and
+  download only; editing, replacing, deleting, and sharing remain with the owner (and Project
+  Managers/Administrators per their rules).
+- Q: When a document is shared with a team, who receives access? → A: Whoever is in that team
+  (department) at the time of access; people who join later gain access, people who leave lose it.
+  Only members at share time are notified.
+- Q: What happens to a project document when its uploader is removed from the project? → A: It stays
+  with the project and visible to project members; the uploader keeps owner rights (edit, delete) on
+  it.
+- Q: Can a user have two documents with the same title or original file name? → A: Yes; titles and
+  file names need not be unique, and each upload is a separate document.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Upload and view my own documents (Priority: P1)
@@ -41,8 +60,9 @@ downloaded with identical content.
    rejected with a message listing the supported file types.
 5. **Given** I leave the title empty or do not choose a category, **When** I try to upload,
    **Then** the upload is blocked and the missing required fields are indicated.
-6. **Given** I select three valid files at once, **When** I upload them, **Then** each file is
-   validated and stored individually and each successful file appears in My Documents.
+6. **Given** I select three valid files at once, **When** I choose one category and upload,
+   **Then** each file is validated and stored individually with the shared metadata, each title
+   defaults to its file name, and each successful file appears in My Documents.
 7. **Given** a document I uploaded is listed, **When** I choose Download, **Then** I receive the
    original file with its original file name.
 8. **Given** another employee uploaded a personal document, **When** I try to download it by any
@@ -200,8 +220,10 @@ recorded and reflected in the reports; confirm non-administrators cannot open th
 - A file fails the malware scan: it is rejected, not stored, and the user is told why.
 - A multi-file upload where some files are invalid: valid files succeed, invalid ones are reported
   individually.
-- A user is removed from a project: they lose access to that project's documents (but keep the
-  documents they own).
+- A user is removed from a project: they lose access to that project's documents except the
+  ones they uploaded, on which they keep owner rights; those documents stay with the project.
+- A user uploads a second document with the same title or file name as an existing one: both are
+  kept as separate documents.
 - A shared document is deleted by its owner: it disappears from recipients' Shared with Me lists.
 - A user tries to share with themselves or with someone who already has access: no duplicate share
   or notification is created.
@@ -217,7 +239,9 @@ recorded and reflected in the reports; confirm non-administrators cannot open th
   and reject any other type with a message listing the supported types.
 - **FR-003**: System MUST reject any file larger than 25 MB with a message stating the limit.
 - **FR-004**: Users MUST provide a title and a category; description, project, and tags are
-  optional.
+  optional. In a multi-file upload, one shared category, project, description, and tag set apply
+  to all files and each title defaults to the file name (editable). Titles and file names need not
+  be unique.
 - **FR-005**: Category MUST be one of: Project Documents, Team Resources, Personal Files, Reports,
   Presentations, Other.
 - **FR-006**: System MUST automatically record upload date and time, uploader, file size, file
@@ -255,8 +279,11 @@ recorded and reflected in the reports; confirm non-administrators cannot open th
 
 **Access control**
 
-- **FR-020**: A user MAY access a document only if they are its owner, a member or manager of its
-  associated project, a recipient of a share, a Team Lead of the owner's team, or an Administrator.
+- **FR-020**: A user MAY view and download a document only if they are its owner, a member or
+  manager of its associated project, a direct share recipient, a current member of a team it is
+  shared with, a Team Lead of the owner's team, or an Administrator. Team Leads have view/download
+  rights only on team members' documents; only owners MAY edit, replace, or share, and deletion
+  follows FR-018.
 - **FR-021**: Access checks MUST be enforced for every list, search, preview, download, edit,
   delete, and share action, including direct links.
 
@@ -267,7 +294,8 @@ recorded and reflected in the reports; confirm non-administrators cannot open th
 - **FR-023**: The dashboard MUST show a Recent Documents widget (last 5 uploads by the user) and the
   user's document count on the summary cards.
 - **FR-024**: Users MUST receive an in-app notification when a document is shared with them and
-  when a document is added to one of their projects.
+  when a document is added to one of their projects. For team shares, users in the team at share
+  time are notified.
 
 **Audit**
 
@@ -287,8 +315,8 @@ recorded and reflected in the reports; confirm non-administrators cannot open th
 - **Document**: A stored file plus metadata: title, description, category, tags, original file
   name, file type, file size, upload date, uploader, optional project, optional task, and storage
   location.
-- **Document Share**: A grant of access to a document for a specific user or team, with who shared
-  it and when.
+- **Document Share**: A grant of access to a document for either a specific user or a team
+  (department, evaluated at access time), with who shared it and when.
 - **Document Activity**: An audit record of an action (upload, download, delete, share) on a
   document by a user at a time.
 - Existing entities used: **User** (owner, recipient, role, department/team), **Project** (and its
