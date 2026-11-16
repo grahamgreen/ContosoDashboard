@@ -17,10 +17,15 @@ public class ApplicationDbContext : DbContext
     public DbSet<Notification> Notifications { get; set; } = null!;
     public DbSet<ProjectMember> ProjectMembers { get; set; } = null!;
     public DbSet<Announcement> Announcements { get; set; } = null!;
+    public DbSet<Document> Documents { get; set; } = null!;
+    public DbSet<DocumentShare> DocumentShares { get; set; } = null!;
+    public DbSet<DocumentActivity> DocumentActivities { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        ConfigureDocuments(modelBuilder);
 
         // Configure User relationships
         modelBuilder.Entity<User>()
@@ -221,5 +226,37 @@ public class ApplicationDbContext : DbContext
                 IsActive = true
             }
         );
+    }
+
+    private static void ConfigureDocuments(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Document>(e =>
+        {
+            e.HasOne(d => d.UploadedByUser).WithMany().HasForeignKey(d => d.UploadedByUserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(d => d.Project).WithMany().HasForeignKey(d => d.ProjectId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(d => d.Task).WithMany().HasForeignKey(d => d.TaskId).OnDelete(DeleteBehavior.Restrict);
+            e.HasIndex(d => d.FilePath).IsUnique();
+            e.HasIndex(d => d.UploadedByUserId);
+            e.HasIndex(d => d.ProjectId);
+            e.HasIndex(d => d.TaskId);
+            e.HasIndex(d => d.Category);
+            e.HasIndex(d => d.UploadedDate);
+        });
+
+        modelBuilder.Entity<DocumentShare>(e =>
+        {
+            e.HasOne(s => s.Document).WithMany(d => d.Shares).HasForeignKey(s => s.DocumentId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(s => s.SharedWithUser).WithMany().HasForeignKey(s => s.SharedWithUserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(s => s.SharedByUser).WithMany().HasForeignKey(s => s.SharedByUserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasIndex(s => new { s.DocumentId, s.SharedWithUserId }).IsUnique().HasFilter("SharedWithUserId IS NOT NULL");
+            e.HasIndex(s => new { s.DocumentId, s.SharedWithDepartment }).IsUnique().HasFilter("SharedWithDepartment IS NOT NULL");
+        });
+
+        modelBuilder.Entity<DocumentActivity>(e =>
+        {
+            e.HasOne(a => a.User).WithMany().HasForeignKey(a => a.UserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasIndex(a => a.Timestamp);
+            e.HasIndex(a => a.DocumentId);
+        });
     }
 }

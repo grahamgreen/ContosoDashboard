@@ -19,26 +19,26 @@ independently. Paths are relative to the repository root.
 
 ## Phase 1: Setup
 
-- [ ] T001 Add `AppData/` to `.gitignore` so uploaded files are never committed
-- [ ] T002 [P] Add `"FileStorage": { "RootPath": "AppData/uploads" }` to `ContosoDashboard/appsettings.json`
-- [ ] T003 [P] Create `ContosoDashboard/Endpoints/` folder for minimal-API endpoints
+- [X] T001 Add `AppData/` to `.gitignore` so uploaded files are never committed
+- [X] T002 [P] Add `"FileStorage": { "RootPath": "AppData/uploads" }` to `ContosoDashboard/appsettings.json`
+- [X] T003 [P] Create `ContosoDashboard/Endpoints/` folder for minimal-API endpoints
 
 ---
 
 ## Phase 2: Foundational (blocks all stories)
 
-- [ ] T004 [P] Create `DocumentCategories` constants (Project Documents, Team Resources, Personal Files, Reports, Presentations, Other) in `ContosoDashboard/Models/DocumentCategories.cs`
-- [ ] T005 [P] Create `Document` entity in `ContosoDashboard/Models/Document.cs`: DocumentId int PK; Title string(255) required; Description string(2000)?; Category string(50) required; Tags string(500)?; OriginalFileName string(255) required; FileType string(255) required; FileSize long; FilePath string(500) required unique; UploadedByUserId int FK; ProjectId int?; TaskId int?; UploadedDate, LastModifiedDate UTC
-- [ ] T006 [P] Create `DocumentShare` entity in `ContosoDashboard/Models/DocumentShare.cs` (exactly one of SharedWithUserId / SharedWithDepartment string(100)?; SharedByUserId; SharedDate)
-- [ ] T007 [P] Create `DocumentActivity` entity in `ContosoDashboard/Models/DocumentActivity.cs` (DocumentId int? without FK; DocumentTitle string(255); FileType string(255); UserId; Action string(20); Timestamp)
-- [ ] T008 Append `DocumentShared`, `DocumentAdded` to `NotificationType` in `ContosoDashboard/Models/Notification.cs`
-- [ ] T009 Register DbSets, relationships (Restrict on User/Project/Task, Cascade shares), unique FilePath, and indexes on UploadedByUserId, ProjectId, TaskId, Category, UploadedDate, Activity.Timestamp in `ContosoDashboard/Data/ApplicationDbContext.cs`
-- [ ] T010 [P] Define `IFileStorageService` (UploadAsync, DeleteAsync, DownloadAsync, GetUrlAsync) in `ContosoDashboard/Services/IFileStorageService.cs`
-- [ ] T011 Implement `LocalFileStorageService` (root from `FileStorage:RootPath` under content root, rejects rooted/`..` paths, creates directories) in `ContosoDashboard/Services/LocalFileStorageService.cs`
-- [ ] T012 [P] Define `IMalwareScanner` + `ScanResult` and implement `SignatureMalwareScanner` (EICAR signature, magic bytes per extension) in `ContosoDashboard/Services/MalwareScanner.cs`
-- [ ] T013 [P] Implement `DocumentValidation` (extension allowlist, extension→MIME map, 25 MB = 26,214,400 bytes limit, previewable types, tag normalization) in `ContosoDashboard/Services/DocumentValidation.cs`
-- [ ] T014 Add `Department` claim at login in `ContosoDashboard/Pages/Login.cshtml.cs`
-- [ ] T015 Register `IFileStorageService`, `IMalwareScanner`, `IDocumentService` in DI in `ContosoDashboard/Program.cs`
+- [X] T004 [P] Create `DocumentCategories` constants (Project Documents, Team Resources, Personal Files, Reports, Presentations, Other) in `ContosoDashboard/Models/DocumentCategories.cs`
+- [X] T005 [P] Create `Document` entity in `ContosoDashboard/Models/Document.cs`: DocumentId int PK; Title string(255) required; Description string(2000)?; Category string(50) required; Tags string(500)?; OriginalFileName string(255) required; FileType string(255) required; FileSize long; FilePath string(500) required unique; UploadedByUserId int FK; ProjectId int?; TaskId int?; UploadedDate, LastModifiedDate UTC
+- [X] T006 [P] Create `DocumentShare` entity in `ContosoDashboard/Models/DocumentShare.cs` (exactly one of SharedWithUserId / SharedWithDepartment string(100)?; SharedByUserId; SharedDate)
+- [X] T007 [P] Create `DocumentActivity` entity in `ContosoDashboard/Models/DocumentActivity.cs` (DocumentId int? without FK; DocumentTitle string(255); FileType string(255); UserId; Action string(20); Timestamp)
+- [X] T008 Append `DocumentShared`, `DocumentAdded` to `NotificationType` in `ContosoDashboard/Models/Notification.cs`
+- [X] T009 Register DbSets, relationships (Restrict on User/Project/Task, Cascade shares), unique FilePath, and indexes on UploadedByUserId, ProjectId, TaskId, Category, UploadedDate, Activity.Timestamp in `ContosoDashboard/Data/ApplicationDbContext.cs`
+- [X] T010 [P] Define `IFileStorageService` (UploadAsync, DeleteAsync, DownloadAsync, GetUrlAsync) in `ContosoDashboard/Services/IFileStorageService.cs`
+- [X] T011 Implement `LocalFileStorageService` (root from `FileStorage:RootPath` under content root, rejects rooted/`..` paths, creates directories) in `ContosoDashboard/Services/LocalFileStorageService.cs`
+- [X] T012 [P] Define `IMalwareScanner` + `ScanResult` and implement `SignatureMalwareScanner` (EICAR signature, magic bytes per extension) in `ContosoDashboard/Services/MalwareScanner.cs`
+- [X] T013 [P] Implement `DocumentValidation` (extension allowlist, extension→MIME map, 25 MB = 26,214,400 bytes limit, previewable types, tag normalization) in `ContosoDashboard/Services/DocumentValidation.cs`
+- [X] T014 Add `Department` claim at login in `ContosoDashboard/Pages/Login.cshtml.cs`
+- [X] T015 Register `IFileStorageService`, `IMalwareScanner`, `IDocumentService` in DI in `ContosoDashboard/Program.cs`
 
 **Checkpoint**: project builds; database recreated with new tables.
 
@@ -50,15 +50,15 @@ independently. Paths are relative to the repository root.
 
 **Independent Test**: quickstart.md → US1.
 
-- [ ] T016 [US1] Create `IDocumentService` and request/result DTOs (`DocumentUploadRequest`, `UploadResult`, `DocumentQuery`) in `ContosoDashboard/Services/DocumentService.cs`
-- [ ] T017 [US1] Implement `DocumentService.UploadAsync`: validate size/type/title/category → check project membership if ProjectId → scan → generate `{userId}/{projectId|personal}/{guid}.{ext}` → save file → insert row (delete file if insert fails) → log `Upload` activity, in `ContosoDashboard/Services/DocumentService.cs`
-- [ ] T018 [US1] Implement `GetMyDocumentsAsync` (owner's documents with Project, AsNoTracking, newest first) in `ContosoDashboard/Services/DocumentService.cs`
-- [ ] T019 [US1] Implement access check `CanViewAsync` and `OpenForReadAsync` (log `Download`/`Preview`) in `ContosoDashboard/Services/DocumentService.cs`
-- [ ] T020 [US1] Map `GET /documents/{id}/download` (attachment, UTF-8 filename, 404 when no access) with `RequireAuthorization()` in `ContosoDashboard/Endpoints/DocumentEndpoints.cs` and call it from `Program.cs`
-- [ ] T021 [US1] Create `/documents` page with `[Authorize]`: upload form (`InputFile multiple` with `@key`, Title, Category select, Description, Project select of user's projects, Tags), per-file progress bar, per-file success/error messages, in `ContosoDashboard/Pages/Documents.razor`
-- [ ] T022 [US1] Add My Documents table (title, category, upload date, size, project, Download link) to `ContosoDashboard/Pages/Documents.razor`
-- [ ] T023 [US1] Add Documents link to `ContosoDashboard/Shared/NavMenu.razor`
-- [ ] T024 [US1] Validate US1 with quickstart.md scenarios (upload, limits, unsupported type, multi-file, download, cross-user denial)
+- [X] T016 [US1] Create `IDocumentService` and request/result DTOs (`DocumentUploadRequest`, `UploadResult`, `DocumentQuery`) in `ContosoDashboard/Services/DocumentService.cs`
+- [X] T017 [US1] Implement `DocumentService.UploadAsync`: validate size/type/title/category → check project membership if ProjectId → scan → generate `{userId}/{projectId|personal}/{guid}.{ext}` → save file → insert row (delete file if insert fails) → log `Upload` activity, in `ContosoDashboard/Services/DocumentService.cs`
+- [X] T018 [US1] Implement `GetMyDocumentsAsync` (owner's documents with Project, AsNoTracking, newest first) in `ContosoDashboard/Services/DocumentService.cs`
+- [X] T019 [US1] Implement access check `CanViewAsync` and `OpenForReadAsync` (log `Download`/`Preview`) in `ContosoDashboard/Services/DocumentService.cs`
+- [X] T020 [US1] Map `GET /documents/{id}/download` (attachment, UTF-8 filename, 404 when no access) with `RequireAuthorization()` in `ContosoDashboard/Endpoints/DocumentEndpoints.cs` and call it from `Program.cs`
+- [X] T021 [US1] Create `/documents` page with `[Authorize]`: upload form (`InputFile multiple` with `@key`, Title, Category select, Description, Project select of user's projects, Tags), per-file progress bar, per-file success/error messages, in `ContosoDashboard/Pages/Documents.razor`
+- [X] T022 [US1] Add My Documents table (title, category, upload date, size, project, Download link) to `ContosoDashboard/Pages/Documents.razor`
+- [X] T023 [US1] Add Documents link to `ContosoDashboard/Shared/NavMenu.razor`
+- [X] T024 [US1] Validate US1 with quickstart.md scenarios (upload, limits, unsupported type, multi-file, download, cross-user denial)
 
 **Checkpoint**: MVP complete and demonstrable.
 
